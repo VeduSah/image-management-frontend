@@ -23,23 +23,28 @@ const authReducer = (state, action) => {
       const token = payload.token || payload.jwt;
       if (token) {
         localStorage.setItem('token', token);
-        setAuthToken(token); // Set the token in axios headers
+        setAuthToken(token);
       }
       return { ...state, token, isAuthenticated: true, loading: false, error: null };
     }
     
     case 'AUTH_ERROR':
+      return { ...state, isAuthenticated: false, loading: false, error: payload };
+    
     case 'LOGIN_FAIL':
     case 'REGISTER_FAIL':
-      return { ...state, isAuthenticated: false, loading: false, user: null, error: payload };
+      return { ...state, isAuthenticated: false, loading: false, error: payload };
     
     case 'LOGOUT':
       localStorage.removeItem('token');
-      setAuthToken(null); // Remove token from axios headers
+      setAuthToken(null);
       return { ...state, token: null, isAuthenticated: false, loading: false, user: null, error: null };
     
     case 'CLEAR_ERROR':
       return { ...state, error: null };
+    
+    case 'SET_LOADING':
+      return { ...state, loading: payload };
     
     default:
       return state;
@@ -49,25 +54,25 @@ const authReducer = (state, action) => {
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  // Load user on app start and when token changes
+  // Load user only if token exists
   const loadUser = async () => {
     const token = localStorage.getItem('token');
     
-    if (token) {
-      setAuthToken(token);
-      try {
-        const res = await axios.get('https://image-management-backend-green.vercel.app/api/auth');
-        dispatch({ type: 'USER_LOADED', payload: res.data });
-        console.log('User loaded successfully:', res.data);
-      } catch (err) {
-        console.error('Failed to load user:', err);
-        dispatch({ type: 'AUTH_ERROR', payload: err.response?.data?.msg || 'Authentication failed' });
-        // Clear invalid token
-        localStorage.removeItem('token');
-        setAuthToken(null);
-      }
-    } else {
-      dispatch({ type: 'AUTH_ERROR', payload: 'No token found' });
+    if (!token) {
+      dispatch({ type: 'SET_LOADING', payload: false });
+      return;
+    }
+    
+    setAuthToken(token);
+    try {
+      const res = await axios.get('https://image-management-backend-green.vercel.app/api/auth');
+      dispatch({ type: 'USER_LOADED', payload: res.data });
+      console.log('User loaded successfully:', res.data);
+    } catch (err) {
+      console.error('Failed to load user:', err);
+      dispatch({ type: 'AUTH_ERROR', payload: err.response?.data?.msg || 'Authentication failed' });
+      localStorage.removeItem('token');
+      setAuthToken(null);
     }
   };
 
@@ -78,13 +83,17 @@ export const AuthProvider = ({ children }) => {
   const register = async (formData) => {
     try {
       dispatch({ type: 'CLEAR_ERROR' });
+      dispatch({ type: 'SET_LOADING', payload: true });
+      
       const res = await axios.post('https://image-management-backend-green.vercel.app/api/auth/register', formData);
+      
       dispatch({ type: 'REGISTER_SUCCESS', payload: res.data });
-      await loadUser(); // Wait for user to be loaded
+      await loadUser();
       return { success: true };
     } catch (err) {
       const errorMsg = err.response?.data?.msg || 'Registration failed';
       dispatch({ type: 'REGISTER_FAIL', payload: errorMsg });
+      dispatch({ type: 'SET_LOADING', payload: false });
       return { success: false, error: errorMsg };
     }
   };
@@ -92,13 +101,17 @@ export const AuthProvider = ({ children }) => {
   const login = async (formData) => {
     try {
       dispatch({ type: 'CLEAR_ERROR' });
+      dispatch({ type: 'SET_LOADING', payload: true });
+      
       const res = await axios.post('https://image-management-backend-green.vercel.app/api/auth/login', formData);
+      
       dispatch({ type: 'LOGIN_SUCCESS', payload: res.data });
-      await loadUser(); // Wait for user to be loaded
+      await loadUser();
       return { success: true };
     } catch (err) {
       const errorMsg = err.response?.data?.msg || 'Login failed';
       dispatch({ type: 'LOGIN_FAIL', payload: errorMsg });
+      dispatch({ type: 'SET_LOADING', payload: false });
       return { success: false, error: errorMsg };
     }
   };
