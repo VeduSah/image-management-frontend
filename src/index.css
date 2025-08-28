@@ -1,0 +1,334 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  font-family: "Poppins", sans-serif !important;
+}
+
+/* Modern animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes count-up {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.8s ease-out;
+}
+
+.animate-fade-in-left {
+  animation: fade-in-left 0.8s ease-out;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-out;
+}
+
+.animate-count-up {
+  animation: count-up 0.6s ease-out;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+.animation-delay-1000 {
+  animation-delay: 1s;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+/* Glassmorphism effects */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-dark {
+  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Smooth scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #ef4444, #f43f5e);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #dc2626, #e11d48);
+}
+
+/* Custom gradient text */
+.gradient-text {
+  background: linear-gradient(45deg, #ef4444, #f43f5e, #ec4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Interactive hover effects */
+.hover-lift {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Pulse animation for status indicators */
+.pulse-slow {
+  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Modern button styles */
+.btn-modern {
+  @apply relative overflow-hidden rounded-2xl px-6 py-3 font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg;
+}
+
+.btn-modern::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.btn-modern:hover::before {
+  left: 100%;
+}
+
+.heroSearchBtn {
+  background: linear-gradient(45deg, #ef4444, #f43f5e);
+  width: 2.8rem;
+  height: 2.9rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 12px;
+  right: 1px;
+  top: 1px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+.heroSearchBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+}
+.player-wrapper {
+  position: relative;
+  padding-top: 56.25%; /* 16:9 aspect ratio */
+}
+
+.react-player {
+  width: 440px !important;
+  height: auto !important;
+}
+@media screen and (max-width: 1392px) {
+  .react-player {
+    width: 100% !important;
+    height: auto !important;
+  }
+  .cdGridRevFlex {
+    display: flex;
+    flex-direction: column-reverse !important;
+  }
+}
+@media screen and (max-width: 640px) {
+  .rsw-toolbar {
+    max-width: 23rem;
+  }
+}
+@media screen and (max-width: 405px) {
+  .rsw-toolbar {
+    max-width: 20rem;
+  }
+}
+.hero-img {
+  -webkit-animation: morph 8s ease-in-out infinite;
+  animation: morph 8s ease-in-out infinite;
+  background-image: url(./assets/pix2.jpeg);
+  background-position: 50%;
+  background-repeat: no-repeat;
+  background-size: cover;
+  border: 3px solid #2d2e32;
+  border-radius: 60% 40% 30% 70%/60% 30% 70% 40%;
+  height: 23rem;
+  position: relative;
+  transition: all 1s ease-in-out;
+  width: 23rem;
+}
+@keyframes morph {
+  0% {
+    border-radius: 60% 40% 30% 70%/60% 30% 70% 40%;
+    /* transform: scale(1); */
+  }
+  50% {
+    border-radius: 40% 60% 70% 30%/30% 70% 40% 60%;
+    /* transform: scale(1.1); */
+  }
+  100% {
+    border-radius: 60% 40% 30% 70%/60% 30% 70% 40%;
+    /* transform: scale(1); */
+  }
+}
+
+.logos ul li {
+  align-items: center;
+  background-color: #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.09);
+  cursor: pointer;
+  display: flex;
+  height: 3rem;
+  justify-content: center;
+  width: 3rem;
+}
+
+.logos ul li img {
+  height: auto;
+  width: 2rem;
+}
+
+.logos ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  list-style: none;
+}
+
+.logos {
+  font-size: 1.7rem;
+}
+@media screen and (max-width: 586px) {
+  .hero-img {
+    height: 21rem;
+    width: 21rem;
+  }
+  .projects-grid .pro__1 {
+    padding: 1rem;
+  }
+  .projects-grid .pro__text {
+    width: auto;
+  }
+  .projects-grid .pro__img {
+    width: 23rem;
+    margin: auto;
+  }
+  .text-intro h1 {
+    font-size: 2rem;
+    text-align: center;
+  }
+  .text-intro p {
+    text-align: center;
+  }
+  .social-intro {
+    justify-content: center;
+    margin: auto;
+  }
+  .about-img {
+    margin: auto;
+  }
+  .text-about h1 {
+    font-size: 2rem;
+    text-align: center;
+  }
+
+  .text-about p:first-child {
+    text-align: center;
+  }
+  .about-btn {
+    width: 100%;
+  }
+  .btn-intro {
+    text-align: center;
+  }
+}
+
+.label {
+  font-weight: 500;
+}
