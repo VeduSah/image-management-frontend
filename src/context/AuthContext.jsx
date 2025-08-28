@@ -4,7 +4,7 @@ import setAuthToken from '../utils/setAuthToken';
 
 const initialState = {
   token: localStorage.getItem('token'),
-  isAuthenticated: null,
+  isAuthenticated: false,
   loading: true,
   user: null,
   error: null,
@@ -16,17 +16,31 @@ const authReducer = (state, action) => {
   const { type, payload } = action;
   switch (type) {
     case 'USER_LOADED':
-      return { ...state, isAuthenticated: true, loading: false, user: payload };
+      return { ...state, isAuthenticated: true, loading: false, user: payload, error: null };
+    
     case 'REGISTER_SUCCESS':
-    case 'LOGIN_SUCCESS':
-      localStorage.setItem('token', payload.token);
-      return { ...state, ...payload, isAuthenticated: true, loading: false, error: null };
+    case 'LOGIN_SUCCESS': {
+      const token = payload.token || payload.jwt;
+      if (token) {
+        localStorage.setItem('token', token);
+        setAuthToken(token); // Set the token in axios headers
+      }
+      return { ...state, token, isAuthenticated: true, loading: false, error: null };
+    }
+    
     case 'AUTH_ERROR':
     case 'LOGIN_FAIL':
     case 'REGISTER_FAIL':
+      return { ...state, isAuthenticated: false, loading: false, user: null, error: payload };
+    
     case 'LOGOUT':
       localStorage.removeItem('token');
-      return { ...state, token: null, isAuthenticated: false, loading: false, user: null, error: payload };
+      setAuthToken(null); // Remove token from axios headers
+      return { ...state, token: null, isAuthenticated: false, loading: false, user: null, error: null };
+    
+    case 'CLEAR_ERROR':
+      return { ...state, error: null };
+    
     default:
       return state;
   }
@@ -35,15 +49,25 @@ const authReducer = (state, action) => {
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
+  // Load user on app start and when token changes
   const loadUser = async () => {
-    if (localStorage.token) {
-      setAuthToken(localStorage.token);
-    }
-    try {
-      const res = await axios.get('https://image-management-backend-green.vercel.app/api/auth');
-      dispatch({ type: 'USER_LOADED', payload: res.data });
-    } catch (err) {
-      dispatch({ type: 'AUTH_ERROR' });
+    const token = localStorage.getItem('token');
+    
+    if (token) {
+      setAuthToken(token);
+      try {
+        const res = await axios.get('https://image-management-backend-green.vercel.app/api/auth');
+        dispatch({ type: 'USER_LOADED', payload: res.data });
+        console.log('User loaded successfully:', res.data);
+      } catch (err) {
+        console.error('Failed to load user:', err);
+        dispatch({ type: 'AUTH_ERROR', payload: err.response?.data?.msg || 'Authentication failed' });
+        // Clear invalid token
+        localStorage.removeItem('token');
+        setAuthToken(null);
+      }
+    } else {
+      dispatch({ type: 'AUTH_ERROR', payload: 'No token found' });
     }
   };
 
@@ -53,30 +77,50 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (formData) => {
     try {
+      dispatch({ type: 'CLEAR_ERROR' });
       const res = await axios.post('https://image-management-backend-green.vercel.app/api/auth/register', formData);
       dispatch({ type: 'REGISTER_SUCCESS', payload: res.data });
-      loadUser();
+      await loadUser(); // Wait for user to be loaded
+      return { success: true };
     } catch (err) {
-      dispatch({ type: 'REGISTER_FAIL', payload: err.response.data.msg });
+      const errorMsg = err.response?.data?.msg || 'Registration failed';
+      dispatch({ type: 'REGISTER_FAIL', payload: errorMsg });
+      return { success: false, error: errorMsg };
     }
   };
 
   const login = async (formData) => {
     try {
+      dispatch({ type: 'CLEAR_ERROR' });
       const res = await axios.post('https://image-management-backend-green.vercel.app/api/auth/login', formData);
       dispatch({ type: 'LOGIN_SUCCESS', payload: res.data });
-      loadUser();
+      await loadUser(); // Wait for user to be loaded
+      return { success: true };
     } catch (err) {
-      dispatch({ type: 'LOGIN_FAIL', payload: err.response.data.msg });
+      const errorMsg = err.response?.data?.msg || 'Login failed';
+      dispatch({ type: 'LOGIN_FAIL', payload: errorMsg });
+      return { success: false, error: errorMsg };
     }
   };
 
-  const logout = () => dispatch({ type: 'LOGOUT' });
+  const logout = () => {
+    dispatch({ type: 'LOGOUT' });
+  };
+
+  const clearError = () => {
+    dispatch({ type: 'CLEAR_ERROR' });
+  };
 
   return (
-    <AuthContext.Provider value={{ ...state, register, login, logout, loadUser }}>
+    <AuthContext.Provider value={{ 
+      ...state, 
+      register, 
+      login, 
+      logout, 
+      loadUser,
+      clearError 
+    }}>
       {children}
     </AuthContext.Provider>
   );
 };
-
